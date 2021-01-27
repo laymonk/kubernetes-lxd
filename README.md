@@ -156,10 +156,7 @@ Below, some commands will need to be executed inside the lxc container and other
        source: /dev/null
        type: disk
    ```
-   When running `kubeadm init`, if you get errors like Module configs not found in directory /lib/modules, install both of the following packages in the container.  I personally do this through the profile I use.
-   ```
-   apt-get install -y linux-image-$(uname -r) linux-modules-$(uname -r)
-   ```
+   
 4. Install docker and kubernetes runtime in the lxc container.
    The following commands add the required repositories, install kubernetes with dependencies, and pin the kubernetes & docker version:
 
@@ -181,6 +178,11 @@ Below, some commands will need to be executed inside the lxc container and other
    ```
    For the first command you need to ignore the `bridge-nf-call-iptables` check which you have done manually before.
    In case you obtain an error like `failed to parse kernel config` in the preflight check, copy your host kernel config to from `/boot` to your lxc-guest `/boot`.
+   
+   In lxd direct containers (ie, not proxmox), if you get errors like Module configs not found in directory /lib/modules, install both of the following packages in the container.  I personally do this through the profile I use.
+   ```
+   @ apt-get install -y linux-image-$(uname -r) linux-modules-$(uname -r)
+   ```
 
 6. Disable the software container network infrastructure, because it is not needed for a dev environment:
    ```bash
