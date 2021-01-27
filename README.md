@@ -142,8 +142,25 @@ Below, some commands will need to be executed inside the lxc container and other
    ```bash
    @ echo 'L /dev/kmsg - - - - /dev/null' > /etc/tmpfiles.d/kmsg.conf
    ```
-
-3. Install docker and kubernetes runtime in the lxc container.
+3. Additional considerations on LXD
+   Disable nf_contrack & apparmor params on the lxd profile used fpr creating the container
+   ```
+   devices:
+     aadisable:
+       path: /sys/module/nf_conntrack/parameters/hashsize
+       source: /dev/null
+       type: disk
+     aadisable1:
+       path: /sys/module/apparmor/parameters/enabled
+       source: /dev/null
+       type: disk
+   ```
+   If you get errors like Module configs not found in directory /lib/modules, install both of the following packages in the container.  
+   I personally do this through the profile I use
+   ```
+   apt-get install -y linux-image-$(uname -r) linux-modules-$(uname -r)
+   ```
+4. Install docker and kubernetes runtime in the lxc container.
    The following commands add the required repositories, install kubernetes with dependencies, and pin the kubernetes & docker version:
 
    ```bash
@@ -157,7 +174,7 @@ Below, some commands will need to be executed inside the lxc container and other
    @ apt-mark hold kubelet kubeadm kubectl docker-ce
    ```
 
-4. Configure the kubelet in the lxc container:
+5. Configure the kubelet in the lxc container:
    ```bash
    @ kubeadm init --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables
    @ kubeadm init phase addon all
@@ -165,14 +182,14 @@ Below, some commands will need to be executed inside the lxc container and other
    For the first command you need to ignore the `bridge-nf-call-iptables` check which you have done manually before.
    In case you obtain an error like `failed to parse kernel config` in the preflight check, copy your host kernel config to from `/boot` to your lxc-guest `/boot`.
 
-5. Disable the software container network infrastructure, because it is not needed for a dev environment:
+6. Disable the software container network infrastructure, because it is not needed for a dev environment:
    ```bash
    @ sed -i 's/--network-plugin=cni //' /var/lib/kubelet/kubeadm-flags.env
    @ systemctl daemon-reload
    @ systemctl restart kubelet
    ```
 
-6. (Optional) Reduce the replica count of the coreDNS service to 1.
+7. (Optional) Reduce the replica count of the coreDNS service to 1.
    ```bash
    @ kubectl scale -n kube-system deployment --replicas 1 coredns
    ```
