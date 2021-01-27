@@ -156,7 +156,7 @@ Below, some commands will need to be executed inside the lxc container and other
        source: /dev/null
        type: disk
    ```
-   If you get errors like Module configs not found in directory /lib/modules, install both of the following packages in the container.  
+   When running `kubeadm init`, If you get errors like Module configs not found in directory /lib/modules, install both of the following packages in the container.  
    I personally do this through the profile I use
    ```
    apt-get install -y linux-image-$(uname -r) linux-modules-$(uname -r)
