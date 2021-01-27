@@ -144,7 +144,7 @@ Below, some commands will need to be executed inside the lxc container and other
    @ echo 'L /dev/kmsg - - - - /dev/null' > /etc/tmpfiles.d/kmsg.conf
    ```
 3. Additional considerations on LXD: 
-   Disable nf_contrack & apparmor params on the lxd profile used for creating the container.  Disabling apparmor this will will have an impact if you are intending to use snapd within the container.  See [Snapd apparmor profiles not being applied in LXD containers](https://forum.snapcraft.io/t/snapd-apparmor-profiles-not-being-applied-in-lxd-containers-with-lxc-apparmor-profile-unconfined-when-host-is-rebooted/5818/8)
+   Disable nf_contrack & apparmor params on the lxd profile used for creating the container.  Disabling apparmor this way will have an impact if you are intending to use snapd within the container.  See [Snapd apparmor profiles not being applied in LXD containers](https://forum.snapcraft.io/t/snapd-apparmor-profiles-not-being-applied-in-lxd-containers-with-lxc-apparmor-profile-unconfined-when-host-is-rebooted/5818/8)
    ```
    devices:
      aadisable:
