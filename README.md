@@ -142,8 +142,8 @@ Below, some commands will need to be executed inside the lxc container and other
    ```bash
    @ echo 'L /dev/kmsg - - - - /dev/null' > /etc/tmpfiles.d/kmsg.conf
    ```
-3. Additional considerations on LXD
-   Disable nf_contrack & apparmor params on the lxd profile used fpr creating the container
+3. Additional considerations on LXD: 
+   Disable nf_contrack & apparmor params on the lxd profile used for creating the container
    ```
    devices:
      aadisable:
