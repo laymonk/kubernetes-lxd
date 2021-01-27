@@ -64,7 +64,12 @@ To use it, install lxd and initialize it using `lxd init`. When prompted, answer
 
 ### Using docker and kubernetes on zfs backed host systems
 
-If your host system is backed by ZFS storage (e.g. an option for Proxmox), some adaption need to be made. ZFS currently lacks full namespace support an thus a dataset cannot be reached into a LXC container retaining full control over the child datasets. The easiest solution is to create two volumes for `/var/lib/docker` and `/var/lib/kubelet` and format these ext4.
+If your host system is backed by ZFS storage (e.g. lxd, or as an option for Proxmox), some adaption need to be made. ZFS currently lacks full namespace support an thus a dataset cannot be reached into a LXC container retaining full control over the child datasets. The easiest solution is to create two volumes for `/var/lib/docker` and `/var/lib/kubelet` and format these as a non-zfs filesystem (eg, ext4, btrfs).  
+
+On lxd, filesystem type ext4 means using the directory type of pool. Btrfs or LVM have [much better support and performance in lxd](https://lxd.readthedocs.io/en/stable-4.0/storage/#storage-backends-and-supported-functions)
+
+#### If using Proxmox
+
 
     zfs create -V 50G mypool/my-dockervol
     zfs create -V 5G mypool/my-kubeletvol
@@ -77,6 +82,31 @@ One then just needs to reach in the two volumes at the right location. The confi
     mp0: /dev/zvol/mypool/my-dockervol,mp=/var/lib/docker,backup=0
     mp1: /dev/zvol/mypool/my-kubeletvol,mp=/var/lib/kubelet,backup=0
     ...
+#### If using lxd 
+
+You have a choice between locating the entire container in one lxd storage pool, or mounting storage pools into specific filesystems within the container whose root filesystem remains ZFS.  That choice will determine if you create 1 or 2 zfs devices.  Personally, I prefer to have the entire container in one pool, and the exmaple below is how to do that.
+
+    zfs create -V 100G mypool/k8s-pool       #choose your preferred size, depending on how much you have or need
+    
+    # we can choose to create the filesystem directly (eg, mkfs.btrfs /dev/zvol/mypool/k8s-pool), or use lxd storage which which is better. 
+    # the zfs dev created above is also available at /dev/zd0, or /dev/zd16 or /dev/zd32, etc ... use 'fdisk -l' to check
+    lxc storage create k8s-vol btrfs source=/dev/zvol/mypool/k8s-pool
+    OR
+    lxc storage create k8s-vol btrfs source=/dev/zd16
+    
+    #then in our lxd profile, we can use this device
+    root:
+      path: /
+      pool: k8s
+      type: disk
+    
+    # due to the issue reported and resolved at https://github.com/charmed-kubernetes/bundle/issues/566, 
+    # we need an extra device entry to keep kubelet happy
+    k8sdev:
+      type: unix-block
+      source: /dev/zd16
+      path: /dev/zd16
+
 
 ## Installing kubernetes in the lxc container
 Below, some commands will need to be executed inside the lxc container and others on the host.
