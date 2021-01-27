@@ -84,7 +84,7 @@ One then just needs to reach in the two volumes at the right location. The confi
     ...
 #### If using lxd 
 
-You have a choice between locating the entire container in one lxd storage pool, or mounting storage pools into specific filesystems within the container whose root filesystem remains ZFS.  That choice will determine if you create 1 or 2 zfs devices.  Personally, I prefer to have the entire container in one pool, and the example below is how to do that for btrfs based storage pool ... can be interpolated for an lvm based pool.
+You have a choice between locating the entire container in one lxd storage pool, or mounting storage pools into specific filesystems within the container whose root filesystem remains ZFS.  That choice will determine if you create 1 or 2 zfs devices.  Personally, I prefer to have the entire container in one pool, and the example below is how to do that for a btrfs based storage pool ... can be interpolated for an lvm based pool.
 
     #choose your preferred size, depending on how much storage you have or need
     zfs create -V 100G mypool/k8s-pool       
@@ -93,6 +93,7 @@ You have a choice between locating the entire container in one lxd storage pool,
     #   or use lxd storage which which is better. 
     # Note: the zfs dev created above is also available at /dev/zd{0,16,32}, etc 
     #   use 'fdisk -l' to check
+    
     lxc storage create k8s-vol btrfs source=/dev/zvol/mypool/k8s-pool
     OR
     lxc storage create k8s-vol btrfs source=/dev/zd16
@@ -143,7 +144,7 @@ Below, some commands will need to be executed inside the lxc container and other
    @ echo 'L /dev/kmsg - - - - /dev/null' > /etc/tmpfiles.d/kmsg.conf
    ```
 3. Additional considerations on LXD: 
-   Disable nf_contrack & apparmor params on the lxd profile used for creating the container
+   Disable nf_contrack & apparmor params on the lxd profile used for creating the container.  Disabling apparmor this will will have an impact if you are intending to use snapd within the container.  See [Snapd apparmor profiles not being applied in LXD containers](https://forum.snapcraft.io/t/snapd-apparmor-profiles-not-being-applied-in-lxd-containers-with-lxc-apparmor-profile-unconfined-when-host-is-rebooted/5818/8)
    ```
    devices:
      aadisable:
