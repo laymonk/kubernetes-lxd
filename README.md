@@ -86,7 +86,8 @@ One then just needs to reach in the two volumes at the right location. The confi
 
 You have a choice between locating the entire container in one lxd storage pool, or mounting storage pools into specific filesystems within the container whose root filesystem remains ZFS.  That choice will determine if you create 1 or 2 zfs devices.  Personally, I prefer to have the entire container in one pool, and the example below is how to do that for btrfs based storage pool ... can be interpolated for an lvm based pool.
 
-    zfs create -V 100G mypool/k8s-pool       #choose your preferred size, depending on how much you have or need
+    #choose your preferred size, depending on how much storage you have or need
+    zfs create -V 100G mypool/k8s-pool       
     
     # we can choose to create the filesystem directly (eg, mkfs.btrfs /dev/zvol/mypool/k8s-pool), 
     #   or use lxd storage which which is better. 
