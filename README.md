@@ -183,6 +183,22 @@ Below, some commands will need to be executed inside the lxc container and other
    ```
    @ apt-get install -y linux-image-$(uname -r) linux-modules-$(uname -r)
    ```
+   In lxd, if you encounter `detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd"`, either manually add the entry below into /etc/docker/daemon.json or use a write-files section (like example below) in your lxd profile.  If updating it manually, restart docker afterwards. See [Change default cgroup driver to systemd](https://github.com/kubernetes/kubeadm/issues/1394) and [container runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
+   ```
+    write_files:
+      - content: |
+          {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-size": "100m"
+            },
+            "storage-driver": "overlay2"
+          }
+        path: /etc/docker/daemon.json
+        permissions: '0644'
+
+   ```
 
 6. Disable the software container network infrastructure, because it is not needed for a dev environment:
    ```bash
